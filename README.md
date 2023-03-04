@@ -16,6 +16,7 @@ forge build
 Create a local `.env` file with the below vars:
 ```shell
 PRIVATE_KEY=
+PUBLIC_ADDRESS=
 BASE_GOERLI_RPC_URL='https://goerli.base.org'
 ```
 
