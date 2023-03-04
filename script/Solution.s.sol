@@ -16,9 +16,9 @@ contract Solution is Script {
     competitorPK = vm.envUint("PRIVATE_KEY");
     competitorPB = vm.envAddress("PUBLIC_ADDRESS");
 
-    // _solveChallenge1();
+    _solveChallenge1();
 
-    // _solveChallenge2();
+    _solveChallenge2();
 
     _solveChallenge3();
 
