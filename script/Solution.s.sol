@@ -39,9 +39,13 @@ contract Solution is Script {
 
   function _solveChallenge3() internal {
     vm.startBroadcast(competitorPK);
+
+    // run once to save the first signature
     bytes memory sig65Byte = _signWithETHHash(competitorPK, "EIP-4844");
     challengeContract.solveChallenge3("EIP-4844", competitorPB, sig65Byte);
 
+    // run second time to prove that you got a different signature
+    // but that results in the same signer
     bytes memory sig64Byte = _signWith64Bytes(competitorPK, "EIP-4844");
     challengeContract.solveChallenge3("EIP-4844", competitorPB, sig64Byte);
     vm.stopBroadcast();
@@ -52,11 +56,13 @@ contract Solution is Script {
   // Helpers //
   /////////////
 
+  // Get a signature from a PK and message that is 65 bits long
   function _signWithETHHash(uint256 privateKey, string memory message) public pure returns (bytes memory signature) {
     (uint8 v, bytes32 r, bytes32 s) = _signWithVRS(privateKey, message);        
     return abi.encodePacked(r, s, v);
   }
 
+  // Get a signature from a PK and message that is 64 bits long
   function _signWith64Bytes(uint256 privateKey, string memory message) public returns (bytes memory) {
     (uint8 v, bytes32 r, bytes32 s) = _signWithVRS(privateKey, message);        
 
@@ -76,6 +82,8 @@ contract Solution is Script {
     return signature;
   }
 
+  // This was a personal learning lesson, but adding the ETH header is required 
+  // as Base's contract assumes its part of the signature.
   function _signWithVRS(uint256 privateKey, string memory message) public pure returns (uint8 v, bytes32 r, bytes32 s) {
     bytes32 messageHash = keccak256(abi.encodePacked(message));
     bytes32 hashWithETHHeader = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", messageHash));
