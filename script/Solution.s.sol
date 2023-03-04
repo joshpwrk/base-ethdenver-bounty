@@ -7,17 +7,38 @@ import "forge-std/console2.sol";
 // run with:
 // forge script script/Solution.s.sol:Solution --rpc-url $BASE_GOERLI_RPC_URL --broadcast --verify -vvvv
 contract Solution is Script {
+  uint256 competitorPK;
+  address competitorPB; 
+  IChallenge challengeContract;
+
   function run() external {
-    _solveChallenge1();
+    challengeContract = IChallenge(0xc1e40f9FD2bc36150e2711e92138381982988791);
+    competitorPK = vm.envUint("PRIVATE_KEY");
+    competitorPB = vm.envAddress("PUBLIC_ADDRESS");
+
+    // _solveChallenge1();
+
+    _solveChallenge2();
   }
 
   function _solveChallenge1() internal {
-    IChallenge challengeContract = IChallenge(0xc1e40f9FD2bc36150e2711e92138381982988791);
-    uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-
-    vm.startBroadcast(deployerPrivateKey);
+    vm.startBroadcast(competitorPK);
     challengeContract.solveChallenge1("faucet");
     vm.stopBroadcast();
+  }
+
+  function _solveChallenge2() internal {
+    vm.startBroadcast(competitorPK);
+    bytes memory signature = _signWithETHHash(competitorPK, "The Merge");
+    challengeContract.solveChallenge2("The Merge", signature);
+    vm.stopBroadcast();
+  }
+
+  function _signWithETHHash(uint256 privateKey, string memory message) public pure returns (bytes memory signature) {
+    bytes32 messageHash = keccak256(abi.encodePacked(message));
+    bytes32 hashWithETHHeader = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", messageHash));
+    (uint8 v, bytes32 r, bytes32 s) = vm.sign(privateKey, hashWithETHHeader);        
+    return abi.encodePacked(r, s, v);
   }
 }
 
